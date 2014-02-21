@@ -43,5 +43,8 @@ To share data between blocks, use a global variable:
     
     <!-- second block -->
     <script type="text/eval+javascript">
-    return $scope.data.name + ' variable';
+    return {
+      name: $scope.data.name,
+      title: 'Test data'
+    }
     </script>
