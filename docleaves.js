@@ -8,17 +8,15 @@ var docleaves = {
 			var script = node.innerHTML.trim();
 
 			var figure = document.createElement('figure');
-			figure.className = 'row'
 			node.parentNode.insertBefore(figure, node);
 			node.parentNode.removeChild(node);
 
 			var code = document.createElement('code');
-			code.className = 'prettyprint lang-js col-md-6';
+			code.className = 'prettyprint lang-js';
 			code.innerHTML = script;
 			figure.appendChild(code);
 
 			var samp = document.createElement('samp');
-			samp.className = 'col-md-6';
 			figure.appendChild(samp);
 
 			(function(script, node) {

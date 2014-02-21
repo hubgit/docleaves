@@ -6,6 +6,12 @@ xmp {
 	display: none;
 }
 
+figure {
+	display: flex !important;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
 figure > code,
 figure > samp {
 	display: block;
@@ -23,12 +29,9 @@ figure > samp {
 	font-size: 80%;
 	line-height: 1;
 	font-family: monospace;
+	flex: 1;
 }
 
 figure > samp.error {
 	border: 2px solid #f00;
-}
-
-.row {
-	margin-left: 0 !important;
 }
