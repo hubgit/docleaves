@@ -2,9 +2,14 @@
 
 var docleaves = {
 	ready: function(){
+		prettyPrint(); // convert the Markown first
+
 		var nodes = document.querySelectorAll('script[type="text/eval+javascript"]');
 
-		Array.prototype.forEach.call(nodes, function(node) {
+		var queue = Array.prototype.slice.call(nodes);
+
+		var run = function() {
+			var node = queue.shift();
 			var script = node.innerHTML.trim();
 
 			var figure = document.createElement('figure');
@@ -19,30 +24,37 @@ var docleaves = {
 			var samp = document.createElement('samp');
 			figure.appendChild(samp);
 
+			var error = function(message) {
+				samp.className = 'error';
+				done(message);
+			};
+
+			var done = function(output) {
+				if (output instanceof Promise) {
+					return output.then(done, error);
+				} else if (output instanceof HTMLElement) {
+					samp.appendChild(output);
+				} else {
+					samp.textContent = JSON.stringify(output, null, 2);
+				}
+
+				if (queue.length) {
+					run();
+				} else {
+					prettyPrint();
+				}
+			};
+
 			(function(script, node) {
 				try {
-					var output = new Function(script)();
-
-					if (output instanceof HTMLElement) {
-						samp.appendChild(output);
-					} else if (output instanceof Promise) {
-						output.then(function(data) {
-							samp.textContent = JSON.stringify(data, null, 2);
-						}, function(e) {
-							samp.className = 'error';
-							samp.textContent = e.message;
-						})
-					} else {
-						samp.textContent = JSON.stringify(output, null, 2);
-					}
+					done(new Function(script)());
 				} catch (e) {
-					samp.className = 'error';
-					samp.textContent = e.message;
+					error(e.message);
 				}
 			})(code.textContent, samp);
-		});
+		}
 
-		prettyPrint();
+		run();
 	}
 };
 
