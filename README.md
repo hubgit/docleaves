@@ -18,7 +18,7 @@ In `body`:
         
         <!-- an example block -->
         <script type="text/eval+javascript">
-        return ['example']; // return a variable, HTML element, or Promise
+        return ['example']; // return data, HTML element, or Promise
         </script>
     </xmp>
     
