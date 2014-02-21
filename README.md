@@ -27,9 +27,13 @@ At the end of `body`:
     <script src="http://git.macropus.org/docleaves/docleaves.js"></script>
     <script>docleaves.ready();</script>
     
-## Global `$scope` variable
+## Global variables
 
-Data that needs to be shared between blocks can be added to the global `$scope` variable
+To share data between blocks, use a global variable:
+
+    <script>
+    var $scope = {};
+    </script>
 
     <script type="text/eval+javascript">
     $scope.data = { name: 'example' };
