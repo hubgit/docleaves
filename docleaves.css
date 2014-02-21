@@ -1,0 +1,30 @@
+body {
+	font-family: sans-serif;
+}
+
+xmp {
+	display: none;
+}
+
+figure > code,
+figure > samp {
+	display: block;
+	white-space: pre-wrap;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 10px;
+	margin: 10px 0;
+	line-height: 1.4;
+}
+
+figure > samp {
+	max-height: 20em;
+	overflow-y: auto;
+	font-size: 80%;
+	line-height: 1;
+	font-family: monospace;
+}
+
+figure > samp.error {
+	border: 2px solid #f00;
+}
