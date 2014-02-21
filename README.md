@@ -13,14 +13,17 @@ In `body`:
 
     <xmp class="container" theme="united">
         <!-- Markdown here -->
+        
+        <script type="text/eval+javascript">
+        return ['example'];
+        </script>
     </xmp>
     
 At the end of `body`:
 
     <script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
     <script src="http://git.macropus.org/docleaves/docleaves.js"></script>
-    
-    <script type="text/eval+javascript">docleaves.ready();</script>
+    <script>docleaves.ready();</script>
     
 ## Global `$scope` variable
 
