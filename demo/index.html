@@ -169,6 +169,27 @@ select.selectAll('option').data(items).enter().append('option').attr('value', fu
 return output;
 </script>
 
+## Asynchronous call
+
+<script type="text/eval+javascript">
+return new Promise(function(resolve, reject) {
+	var xhr = new XMLHttpRequest;
+
+	xhr.onload = function() {
+		resolve(xhr.response, xhr.statusText, xhr);
+	};
+
+	xhr.onerror = function() {
+		reject(xhr.statusText, xhr);
+	};
+
+	xhr.open('GET', 'https://peerj.com/articles/182.json');
+	xhr.responseType = 'json';
+
+	xhr.send();
+});
+</script>
+
 </xmp>
 
 <!-- scripts -->

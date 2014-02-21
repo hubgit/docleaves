@@ -25,6 +25,13 @@ var docleaves = {
 
 					if (output instanceof HTMLElement) {
 						samp.appendChild(output);
+					} else if (output instanceof Promise) {
+						output.then(function(data) {
+							samp.textContent = JSON.stringify(data, null, 2);
+						}, function(e) {
+							samp.className = 'error';
+							samp.textContent = e.message;
+						})
 					} else {
 						samp.textContent = JSON.stringify(output, null, 2);
 					}
