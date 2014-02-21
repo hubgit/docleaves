@@ -15,7 +15,7 @@
 ## Data
 
 <script type="text/eval+javascript">
-return data;
+return $scope.data;
 </script>
 
 ## Single-level nest: group by status
@@ -23,7 +23,7 @@ return data;
 <script type="text/eval+javascript">
 return d3.nest().key(function(d)  {
 	return d.status;
-}).entries(data);
+}).entries($scope.data);
 </script>
 
 ## Two-level nest: group by status then priority
@@ -33,7 +33,7 @@ return d3.nest().key(function(d) {
 	return d.status;
 }).key(function(d) {
 	return d.priority;
-}).entries(data);
+}).entries($scope.data);
 </script>
 
 ## Use rollup to count leaves
@@ -47,7 +47,7 @@ return d3.nest().key(function(d) {
 	return d.priority;
 }).rollup(function(leaves) {
 	return leaves.length;
-}).entries(data);
+}).entries($scope.data);
 </script>
 
 ## Rollup does sums as well
@@ -66,7 +66,7 @@ return d3.nest().key(function(d) {
 			return parseFloat(d.time);
 		})
 	}
-}).entries(data);
+}).entries($scope.data);
 </script>
 
 ## Rollup everything to get a grand total of number of lines
@@ -76,7 +76,7 @@ No key
 <script type="text/eval+javascript">
 return d3.nest().rollup(function(leaves) {
 	return leaves.length;
-}).entries(data);
+}).entries($scope.data);
 </script>
 
 ## Sorting
@@ -90,7 +90,7 @@ return d3.nest().key(function(d) {
 	return d.priority;
 }).sortKeys(d3.descending).rollup(function(leaves) {
 	return leaves.length;
-}).entries(data);
+}).entries($scope.data);
 </script>
 
 ## Sorting - custom order
@@ -108,7 +108,7 @@ return d3.nest().key(function(d) {
 	return priorities.indexOf(a) - priorities.indexOf(b);
 }).rollup(function(leaves) {
 	return leaves.length;
-}).entries(data);
+}).entries($scope.data);
 </script>
 
 ## Sorting - sort the leaves as well
@@ -126,7 +126,7 @@ return d3.nest().key(function(d) {
 	return priorities.indexOf(a) - priorities.indexOf(b);
 }).sortValues(function(a,b) {
 	return parseFloat(a.time) - parseFloat(b.time);
-}).entries(data);
+}).entries($scope.data);
 </script>
 
 ## Sorting - sort the leaves as well
@@ -144,7 +144,7 @@ return d3.nest().key(function(d) {
 	return priorities.indexOf(a) - priorities.indexOf(b);
 }).sortValues(function(a,b) {
 	return a.who &lt; b.who ? -1 : 1;
-}).entries(data);
+}).entries($scope.data);
 </script>
 
 ## Populate a Select list from csv data
@@ -156,7 +156,7 @@ var items = d3.nest().key(function(d) {
 	return d.who;
 }).sortKeys(d3.ascending).rollup(function(leaves) {
 	return leaves.length;
-}).entries(data);
+}).entries($scope.data);
 
 var output = document.createElement('div');
 var select = d3.select(output).append('select');
@@ -176,4 +176,11 @@ return output;
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
 <script src="../docleaves.js"></script>
-<script>d3.csv('data.csv', docleaves.ready);</script>
+<script>
+var $scope = {};
+
+d3.csv('data.csv', function(data) {
+	$scope.data = data;
+	docleaves.ready();
+});
+</script>

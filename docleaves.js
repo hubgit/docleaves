@@ -1,9 +1,7 @@
 'use strict';
 
-var $scope = {};
-
 var docleaves = {
-	ready: function(data){
+	ready: function(){
 		var nodes = document.querySelectorAll('script[type="text/eval+javascript"]');
 
 		Array.prototype.forEach.call(nodes, function(node) {
@@ -23,7 +21,7 @@ var docleaves = {
 
 			(function(script, node) {
 				try {
-					var output = new Function('data', script)(data);
+					var output = new Function(script)();
 
 					if (output instanceof HTMLElement) {
 						samp.appendChild(output);
