@@ -68,7 +68,7 @@ return $scope.nested.rollup(function(leaves) {
 }).entries($scope.data);
 </script>
 
-## Rollup everything to get a grand total of number of lines
+## Rollup everything to get a grand total of number of items
 
 <script type="text/eval+javascript">
 return d3.nest().rollup(function(leaves) {
@@ -78,7 +78,7 @@ return d3.nest().rollup(function(leaves) {
 
 ## Sorting
 
-Each level can be sorted by key - a simple ascending or descending...
+Each level can be sorted by key - ascending or descending
 
 <script type="text/eval+javascript">
 return $scope.nested.sortKeys(d3.ascending).rollup(function(leaves) {
@@ -110,9 +110,7 @@ return $scope.sorted.sortValues(function(a,b) {
 }).entries($scope.data);
 </script>
 
-## Populate a Select list from csv data
-
-Use nest to get a unique list of people then create a select from it.
+## Populate a select list
 
 <script type="text/eval+javascript">
 var items = d3.nest().key(function(d) {
