@@ -16,8 +16,9 @@ In `body`:
     <xmp class="container" theme="united">
         <!-- Markdown here -->
         
+        <!-- an example block -->
         <script type="text/eval+javascript">
-        return ['example'];
+        return ['example']; // return a variable, HTML element, or Promise
         </script>
     </xmp>
     
