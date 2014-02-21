@@ -1,5 +1,9 @@
 'use strict';
 
+if (typeof window.Promise != 'function') {
+	alert('This requires a browser that supports ES6 Promises, e.g. Chrome 32');
+}
+
 var docleaves = {
 	ready: function(){
 		prettyPrint(); // convert the Markown first
