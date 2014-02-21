@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>D3 Nesting Examples</title>
+
+<!-- styles -->
+<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="../docleaves.css">
+
+<xmp class="container" theme="united">
+
+<!-- elements -->
+
+# D3 Nest examples
+
+Group by status
+
+<script type="text/eval+javascript">
+return d3.nest().key(function(d)  {
+	return d.status;
+}).entries(data);
+</script>
+
+## Simple two level nest
+
+Group by status then priority
+
+<script type="text/eval+javascript">
+return d3.nest().key(function(d) {
+	return d.status;
+}).key(function(d) {
+	return d.priority;
+}).entries(data);
+</script>
+
+## Use rollup to count leaves
+
+The leaf level is replaced by a value at the parent level
+
+<script type="text/eval+javascript">
+return d3.nest().key(function(d) {
+	return d.status;
+}).key(function(d) {
+	return d.priority;
+}).rollup(function(leaves) {
+	return leaves.length;
+}).entries(data);
+</script>
+
+## Rollup does sums as well
+
+Can't have two rollups, but can return an object/array
+
+<script type="text/eval+javascript">
+return d3.nest().key(function(d) {
+	return d.status;
+}).key(function(d) {
+	return d.priority;
+}).rollup(function(leaves) {
+	return {
+		length: leaves.length,
+		total_time: d3.sum(leaves, function(d) {
+			return parseFloat(d.time);
+		})
+	}
+}).entries(data);
+</script>
+
+## Rollup everything to get a grand total of number of lines
+
+No key
+
+<script type="text/eval+javascript">
+return d3.nest().rollup(function(leaves) {
+	return leaves.length;
+}).entries(data);
+</script>
+
+## Sorting
+
+Each level can be sorted by key - a simple ascending or descending...
+
+<script type="text/eval+javascript">
+return d3.nest().key(function(d) {
+	return d.status;
+}).sortKeys(d3.ascending).key(function(d) {
+	return d.priority;
+}).sortKeys(d3.descending).rollup(function(leaves) {
+	return leaves.length;
+}).entries(data);
+</script>
+
+## Sorting - custom order
+
+Status, fortuitously, can be sorted in ascending order, but Priority requires a custom order. Create an list in the order you want and use indexOf to create the order comparator function.
+
+<script type="text/eval+javascript">
+var priorities = ['MUST', 'SHOULD', 'COULD', 'WISH'];
+
+return d3.nest().key(function(d) {
+	return d.status;
+}).sortKeys(d3.ascending).key(function(d) {
+	return d.priority;
+}).sortKeys(function(a,b) {
+	return priorities.indexOf(a) - priorities.indexOf(b);
+}).rollup(function(leaves) {
+	return leaves.length;
+}).entries(data);
+</script>
+
+## Sorting - sort the leaves as well
+
+Use sortValue to sort the leaves - sort by time with smallest first
+
+<script type="text/eval+javascript">
+var priorities = ['MUST', 'SHOULD', 'COULD', 'WISH'];
+
+return d3.nest().key(function(d) {
+	return d.status;
+}).sortKeys(d3.ascending).key(function(d) {
+	return d.priority;
+}).sortKeys(function(a,b) {
+	return priorities.indexOf(a) - priorities.indexOf(b);
+}).sortValues(function(a,b) {
+	return parseFloat(a.time) - parseFloat(b.time);
+}).entries(data);
+</script>
+
+## Sorting - sort the leaves as well
+
+Use sortValue to sort the leaves - sort by person this time.
+
+<script type="text/eval+javascript">
+var priorities = ['MUST', 'SHOULD', 'COULD', 'WISH'];
+
+return d3.nest().key(function(d) {
+	return d.status;
+}).sortKeys(d3.ascending).key(function(d) {
+	return d.priority;
+}).sortKeys(function(a,b) {
+	return priorities.indexOf(a) - priorities.indexOf(b);
+}).sortValues(function(a,b) {
+	return a.who &lt; b.who ? -1 : 1;
+}).entries(data);
+</script>
+
+## Populate a Select list from csv data
+
+Use nest to get a unique list of people then create a select from it.
+
+<script type="text/eval+javascript">
+var items = d3.nest().key(function(d) {
+	return d.who;
+}).sortKeys(d3.ascending).rollup(function(leaves) {
+	return leaves.length;
+}).entries(data);
+
+var output = document.createElement('div');
+var select = d3.select(output).append('select');
+
+select.selectAll('option').data(items).enter().append('option').attr('value', function(d) {
+	return d.key;
+}).text(function(d) {
+	return d.key;
+});
+
+return output;
+</script>
+
+</xmp>
+
+<!-- scripts -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
+<script src="../docleaves.js"></script>
+<script>d3.csv('data.csv', docleaves.ready);</script>
