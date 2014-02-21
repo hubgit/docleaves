@@ -2,6 +2,8 @@
 
 Interleaved documents
 
+[View a demonstration](http://git.macropus.org/docleaves/demo/)
+
 ## Usage
 
 Somewhere in `<head>`:
@@ -29,11 +31,7 @@ At the end of `body`:
 
 Data that needs to be shared between blocks can be added to the global `$scope` variable
 
-    <script>
-    var $scope = {};
-    
-    d3.csv('data.csv', function(data) {
-    	$scope.data = data;
-    	docleaves.ready();
-    });
+    <script type="text/eval+javascript">
+    $scope.data = { name: 'example' };
+    return $scope.data;
     </script>
