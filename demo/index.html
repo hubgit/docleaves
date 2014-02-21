@@ -9,13 +9,16 @@
 <!-- elements -->
 <xmp class="container" theme="united">
 
-# Asynchronous call
+# D3 Nest examples
 
-<script type="text/eval+javascript">
+## Asynchronous call
+
+<script type="text/eval+javascript" placeholder="Loading…">
 return new Promise(function(resolve, reject) {
 	var xhr = new XMLHttpRequest;
 
 	xhr.onload = function() {
+		$scope.data = xhr.response._items;
 		resolve(xhr.response, xhr.statusText, xhr);
 	};
 
@@ -30,30 +33,16 @@ return new Promise(function(resolve, reject) {
 });
 </script>
 
-# D3 Nest examples
-
-## Data
+## Single-level nest: group by subject
 
 <script type="text/eval+javascript">
-return $scope.data;
-</script>
+var list = d3.nest().key(function(d)  {
+	return d.subjects[0];
+});
 
-## Single-level nest: group by status
+$scope.nested = list;
 
-<script type="text/eval+javascript">
-return d3.nest().key(function(d)  {
-	return d.status;
-}).entries($scope.data);
-</script>
-
-## Two-level nest: group by status then priority
-
-<script type="text/eval+javascript">
-return d3.nest().key(function(d) {
-	return d.status;
-}).key(function(d) {
-	return d.priority;
-}).entries($scope.data);
+return list.entries($scope.data);
 </script>
 
 ## Use rollup to count leaves
@@ -61,37 +50,25 @@ return d3.nest().key(function(d) {
 The leaf level is replaced by a value at the parent level
 
 <script type="text/eval+javascript">
-return d3.nest().key(function(d) {
-	return d.status;
-}).key(function(d) {
-	return d.priority;
-}).rollup(function(leaves) {
+return $scope.nested.rollup(function(leaves) {
 	return leaves.length;
 }).entries($scope.data);
 </script>
 
 ## Rollup does sums as well
 
-Can't have two rollups, but can return an object/array
-
 <script type="text/eval+javascript">
-return d3.nest().key(function(d) {
-	return d.status;
-}).key(function(d) {
-	return d.priority;
-}).rollup(function(leaves) {
+return $scope.nested.rollup(function(leaves) {
 	return {
 		length: leaves.length,
-		total_time: d3.sum(leaves, function(d) {
-			return parseFloat(d.time);
+		total_subjects: d3.sum(leaves, function(d) {
+			return d.subjects.length;
 		})
 	}
 }).entries($scope.data);
 </script>
 
 ## Rollup everything to get a grand total of number of lines
-
-No key
 
 <script type="text/eval+javascript">
 return d3.nest().rollup(function(leaves) {
@@ -104,66 +81,32 @@ return d3.nest().rollup(function(leaves) {
 Each level can be sorted by key - a simple ascending or descending...
 
 <script type="text/eval+javascript">
-return d3.nest().key(function(d) {
-	return d.status;
-}).sortKeys(d3.ascending).key(function(d) {
-	return d.priority;
-}).sortKeys(d3.descending).rollup(function(leaves) {
+return $scope.nested.sortKeys(d3.ascending).rollup(function(leaves) {
 	return leaves.length;
 }).entries($scope.data);
 </script>
 
 ## Sorting - custom order
 
-Status, fortuitously, can be sorted in ascending order, but Priority requires a custom order. Create an list in the order you want and use indexOf to create the order comparator function.
-
 <script type="text/eval+javascript">
-var priorities = ['MUST', 'SHOULD', 'COULD', 'WISH'];
+var sticky = ['Paleontology', 'Ecology'];
 
-return d3.nest().key(function(d) {
-	return d.status;
-}).sortKeys(d3.ascending).key(function(d) {
-	return d.priority;
-}).sortKeys(function(a,b) {
-	return priorities.indexOf(a) - priorities.indexOf(b);
+var list = $scope.nested.sortKeys(function(a,b) {
+	return sticky.indexOf(b) - sticky.indexOf(a);
 }).rollup(function(leaves) {
 	return leaves.length;
-}).entries($scope.data);
+});
+
+$scope.sorted = list;
+
+return list.entries($scope.data);
 </script>
 
-## Sorting - sort the leaves as well
-
-Use sortValue to sort the leaves - sort by time with smallest first
+## Sorting - sort the leaves by value
 
 <script type="text/eval+javascript">
-var priorities = ['MUST', 'SHOULD', 'COULD', 'WISH'];
-
-return d3.nest().key(function(d) {
-	return d.status;
-}).sortKeys(d3.ascending).key(function(d) {
-	return d.priority;
-}).sortKeys(function(a,b) {
-	return priorities.indexOf(a) - priorities.indexOf(b);
-}).sortValues(function(a,b) {
-	return parseFloat(a.time) - parseFloat(b.time);
-}).entries($scope.data);
-</script>
-
-## Sorting - sort the leaves as well
-
-Use sortValue to sort the leaves - sort by person this time.
-
-<script type="text/eval+javascript">
-var priorities = ['MUST', 'SHOULD', 'COULD', 'WISH'];
-
-return d3.nest().key(function(d) {
-	return d.status;
-}).sortKeys(d3.ascending).key(function(d) {
-	return d.priority;
-}).sortKeys(function(a,b) {
-	return priorities.indexOf(a) - priorities.indexOf(b);
-}).sortValues(function(a,b) {
-	return a.who &lt; b.who ? -1 : 1;
+return $scope.sorted.sortValues(function(a,b) {
+	return a.date > b.date ? 1 : -1;
 }).entries($scope.data);
 </script>
 
@@ -173,7 +116,7 @@ Use nest to get a unique list of people then create a select from it.
 
 <script type="text/eval+javascript">
 var items = d3.nest().key(function(d) {
-	return d.who;
+	return d.subjects[0];
 }).sortKeys(d3.ascending).rollup(function(leaves) {
 	return leaves.length;
 }).entries($scope.data);
@@ -198,9 +141,5 @@ return output;
 <script src="../docleaves.js"></script>
 <script>
 var $scope = {};
-
-d3.csv('data.csv', function(data) {
-	$scope.data = data;
-	docleaves.ready();
-});
+docleaves.ready();
 </script>

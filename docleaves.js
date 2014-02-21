@@ -11,6 +11,7 @@ var docleaves = {
 		var run = function() {
 			var node = queue.shift();
 			var script = node.innerHTML.trim();
+			var placeholder = node.getAttribute('placeholder');
 
 			var figure = document.createElement('figure');
 			node.parentNode.insertBefore(figure, node);
@@ -22,6 +23,7 @@ var docleaves = {
 			figure.appendChild(code);
 
 			var samp = document.createElement('samp');
+			samp.textContent = placeholder;
 			figure.appendChild(samp);
 
 			var error = function(message) {
@@ -40,9 +42,9 @@ var docleaves = {
 
 				if (queue.length) {
 					run();
-				} else {
+				} //else {
 					prettyPrint();
-				}
+				//}
 			};
 
 			(function(script, node) {
