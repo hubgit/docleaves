@@ -1,5 +1,7 @@
 'use strict';
 
+var $scope = {};
+
 var docleaves = {
 	ready: function(data){
 		var nodes = document.querySelectorAll('script[type="text/eval+javascript"]');
