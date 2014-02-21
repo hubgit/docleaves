@@ -31,11 +31,17 @@ At the end of `body`:
 
 To share data between blocks, use a global variable:
 
+    <!-- generic script element -->
     <script>
     var $scope = {};
     </script>
 
+    <!-- first block -->
     <script type="text/eval+javascript">
     $scope.data = { name: 'example' };
-    return $scope.data;
+    </script>
+    
+    <!-- second block -->
+    <script type="text/eval+javascript">
+    return $scope.data.name + ' variable';
     </script>
