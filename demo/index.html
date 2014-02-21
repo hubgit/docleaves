@@ -12,7 +12,13 @@
 
 # D3 Nest examples
 
-Group by status
+## Data
+
+<script type="text/eval+javascript">
+return data;
+</script>
+
+## Single-level nest: group by status
 
 <script type="text/eval+javascript">
 return d3.nest().key(function(d)  {
@@ -20,9 +26,7 @@ return d3.nest().key(function(d)  {
 }).entries(data);
 </script>
 
-## Simple two level nest
-
-Group by status then priority
+## Two-level nest: group by status then priority
 
 <script type="text/eval+javascript">
 return d3.nest().key(function(d) {
