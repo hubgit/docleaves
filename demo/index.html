@@ -7,6 +7,7 @@
 
 <!-- scripts -->
 <script>var $scope = {};</script>
+<script src="d3/d3.js"></script>
 <script src="../docleaves.js"></script>
 
 <!-- elements -->
@@ -16,24 +17,14 @@
 
 ## Asynchronous call
 
-<script type="text/eval+javascript" class="leaf" placeholder="Loading…">
-return new Promise(function(resolve, reject) {
-	var xhr = new XMLHttpRequest;
+<script type="text/eval+javascript" class="leaf auto" placeholder="Loading…">
+var request = docleaves.get('https://peerj.com/articles/index.json', 'json');
 
-	xhr.onload = function() {
-		$scope.data = xhr.response._items;
-		resolve(xhr.response, xhr.statusText, xhr);
-	};
-
-	xhr.onerror = function() {
-		reject(xhr.statusText, xhr);
-	};
-
-	xhr.open('GET', 'https://peerj.com/articles/index.json');
-	xhr.responseType = 'json';
-
-	xhr.send();
+request.then(function(data) {
+	$scope.data = data._items;
 });
+
+return request;
 </script>
 
 ## Single-level nest: group by subject
@@ -115,7 +106,7 @@ return $scope.sorted.sortValues(function(a,b) {
 
 ## Populate a select list
 
-<script type="text/eval+javascript" class="leaf">
+<script type="text/eval+javascript" class="leaf auto">
 var items = d3.nest().key(function(d) {
 	return d.subjects[0];
 }).sortKeys(d3.ascending).rollup(function(leaves) {

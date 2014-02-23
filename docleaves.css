@@ -49,6 +49,7 @@ figure > samp.error {
 .CodeMirror {
 	min-width: 20em;
 	height: auto;
+	padding: 5px 10px 10px 0;
 }
 
 .CodeMirror-scroll {

@@ -10,17 +10,17 @@ var docleaves = {
 	queue: [],
 	base: scripts[scripts.length - 1].getAttribute('src').replace(/\/[^\/]*$/, '/'),
 	requirements: [
-		'vendor/d3/d3.js',
 		'vendor/marked/lib/marked.js',
 		'vendor/codemirror/lib/codemirror.js',
 		'vendor/codemirror/mode/javascript/javascript.js',
 		'vendor/highlight/highlight.pack.js'
 	],
+
 	convert: function(node) {
-		console.log('convert');
 		node.innerHTML = marked(node.innerHTML);
 		node.style.display = 'block';
 	},
+
 	prepare: function(node){
 		var figure = document.createElement('figure');
 		node.parentNode.insertBefore(figure, node);
@@ -39,17 +39,23 @@ var docleaves = {
 		samp.textContent = node.getAttribute('placeholder');
 		figure.appendChild(samp);
 
-		node.parentNode.removeChild(node);
-
-		docleaves.queue.push(figure);
-	},
-
-	run: function() {
-		if (!docleaves.queue.length) {
-			return;
+		if (node.className.match(/\bauto\b/)) {
+			docleaves.queue.push(figure);
+		} else {
+			var button = document.createElement('button');
+			button.className = 'btn btn-primary'
+			button.textContent = 'Run';
+			button.addEventListener('click', function(event) {
+				event.preventDefault();
+				docleaves.run(figure);
+			});
+			samp.appendChild(button);
 		}
 
-		var figure = docleaves.queue.shift();
+		node.parentNode.removeChild(node);
+	},
+
+	run: function(figure, output) {
 		var samp = figure.querySelector('samp');
 		var script = figure.querySelector('textarea').textContent;
 
@@ -60,6 +66,7 @@ var docleaves = {
 
 		var done = function(output) {
 			samp.className = 'success';
+
 			if (output instanceof Promise) {
 				return output.then(done, error);
 			} else if (output instanceof HTMLElement) {
@@ -69,14 +76,16 @@ var docleaves = {
 				hljs.highlightBlock(samp);
 			}
 
-			docleaves.run();
+			if (docleaves.queue.length) {
+				docleaves.run(docleaves.queue.shift(), output);
+			}
 		};
 
 		(function(script, node) {
 			samp.className = 'running';
 
 			try {
-				done(new Function(script)());
+				done(new Function('input', script)(output));
 			} catch (e) {
 				error(e.message);
 			}
@@ -91,17 +100,36 @@ var docleaves = {
 		Array.prototype.forEach.call(document.querySelectorAll('.leaf'), docleaves.prepare);
 
 		// run each script
-		docleaves.run();
+		if (docleaves.queue.length) {
+			docleaves.run(docleaves.queue.shift());
+		}
 	},
 
-	require: function(callback) {
+	require: function() {
 		var script = document.createElement('script');
 		script.src = docleaves.base + docleaves.requirements.shift();
 		script.onload = docleaves.requirements.length ? docleaves.require : docleaves.ready;
 		document.body.appendChild(script);
+	},
+
+	get: function(url, responseType) {
+		return new Promise(function(resolve, reject) {
+			var xhr = new XMLHttpRequest;
+
+			xhr.onload = function() {
+				resolve(xhr.response, xhr.statusText, xhr);
+			};
+
+			xhr.onerror = function() {
+				reject(xhr.statusText, xhr);
+			};
+
+			xhr.open('GET', url);
+			xhr.responseType = responseType || 'json';
+
+			xhr.send();
+		});
 	}
 };
 
-document.addEventListener('DOMContentLoaded', function() {
-	docleaves.require();
-});
+document.addEventListener('DOMContentLoaded', docleaves.require);
