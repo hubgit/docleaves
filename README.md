@@ -7,27 +7,21 @@ Interleaved documents
 ## Usage
 
 Somewhere in `<head>`:
-  
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="http://git.macropus.org/docleaves/docleaves.css">
-    
+
+    <link href="http://git.macropus.org/docleaves/docleaves.css" rel="stylesheet">
+    <script src="http://git.macropus.org/docleaves/docleaves.js"></script>
+
 In `body`:
 
-    <xmp class="container" theme="united">
+    <article class="container markdown">
         <!-- Markdown here -->
-        
+
         <!-- an example block -->
-        <script type="text/eval+javascript">
+        <script type="text/eval+javascript" class="leaf">
         return ['example']; // return data, HTML element, or Promise
         </script>
-    </xmp>
-    
-At the end of `body`:
+    </article>
 
-    <script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
-    <script src="http://git.macropus.org/docleaves/docleaves.js"></script>
-    <script>docleaves.ready();</script>
-    
 ## Global variables
 
 To share data between blocks, use a global variable:
@@ -41,7 +35,7 @@ To share data between blocks, use a global variable:
     <script type="text/eval+javascript">
     $scope.data = { name: 'example' };
     </script>
-    
+
     <!-- second block -->
     <script type="text/eval+javascript">
     return {
