@@ -1,9 +1,10 @@
+@import url(vendor/bootstrap/css/bootstrap.min.css);
+@import url(vendor/codemirror/lib/codemirror.css);
+@import url(vendor/codemirror/theme/blackboard.css);
+@import url(vendor/highlight/styles/foundation.css);
+
 body {
 	font-family: sans-serif;
-}
-
-xmp {
-	display: none;
 }
 
 figure {
@@ -12,27 +13,45 @@ figure {
 	flex-wrap: wrap;
 }
 
-figure > code,
 figure > samp {
 	display: block;
 	white-space: pre-wrap;
 	box-sizing: border-box;
 	padding: 10px;
-	margin: 10px 0;
 	line-height: 1.4;
 	overflow-x: auto;
 	min-width: 20em;
-}
-
-figure > samp {
-	max-height: 20em;
+	max-height: 25em;
 	overflow-y: auto;
 	font-size: 80%;
 	line-height: 1;
 	font-family: monospace;
 	flex: 1;
+	border-left: 5px solid transparent;
+}
+
+figure > samp.running {
+	border-left-color: yellow;
+}
+
+figure > samp.success {
+	border-left-color: green;
 }
 
 figure > samp.error {
-	border: 2px solid #f00;
+	border-left-color: red;
+}
+
+.markdown {
+	display: none;
+}
+
+.CodeMirror {
+	min-width: 20em;
+	height: auto;
+}
+
+.CodeMirror-scroll {
+	overflow-y: hidden;
+	overflow-x: auto;
 }

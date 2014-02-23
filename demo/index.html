@@ -3,17 +3,20 @@
 <title>D3 Nesting Examples</title>
 
 <!-- styles -->
-<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 <link rel="stylesheet" href="../docleaves.css">
 
+<!-- scripts -->
+<script>var $scope = {};</script>
+<script src="../docleaves.js"></script>
+
 <!-- elements -->
-<xmp class="container" theme="united">
+<article class="container markdown">
 
 # D3 Nest examples
 
 ## Asynchronous call
 
-<script type="text/eval+javascript" placeholder="Loading…">
+<script type="text/eval+javascript" class="leaf" placeholder="Loading…">
 return new Promise(function(resolve, reject) {
 	var xhr = new XMLHttpRequest;
 
@@ -35,7 +38,7 @@ return new Promise(function(resolve, reject) {
 
 ## Single-level nest: group by subject
 
-<script type="text/eval+javascript">
+<script type="text/eval+javascript" class="leaf">
 var list = d3.nest().key(function(d)  {
 	return d.subjects[0];
 });
@@ -49,7 +52,7 @@ return list.entries($scope.data);
 
 The leaf level is replaced by a value at the parent level
 
-<script type="text/eval+javascript">
+<script type="text/eval+javascript" class="leaf">
 return $scope.nested.rollup(function(leaves) {
 	return leaves.length;
 }).entries($scope.data);
@@ -57,7 +60,7 @@ return $scope.nested.rollup(function(leaves) {
 
 ## Rollup does sums as well
 
-<script type="text/eval+javascript">
+<script type="text/eval+javascript" class="leaf">
 return $scope.nested.rollup(function(leaves) {
 	return {
 		length: leaves.length,
@@ -70,7 +73,7 @@ return $scope.nested.rollup(function(leaves) {
 
 ## Rollup everything to get a grand total of number of items
 
-<script type="text/eval+javascript">
+<script type="text/eval+javascript" class="leaf">
 return d3.nest().rollup(function(leaves) {
 	return leaves.length;
 }).entries($scope.data);
@@ -80,7 +83,7 @@ return d3.nest().rollup(function(leaves) {
 
 Each level can be sorted by key - ascending or descending
 
-<script type="text/eval+javascript">
+<script type="text/eval+javascript" class="leaf">
 return $scope.nested.sortKeys(d3.ascending).rollup(function(leaves) {
 	return leaves.length;
 }).entries($scope.data);
@@ -88,7 +91,7 @@ return $scope.nested.sortKeys(d3.ascending).rollup(function(leaves) {
 
 ## Sorting - custom order
 
-<script type="text/eval+javascript">
+<script type="text/eval+javascript" class="leaf">
 var sticky = ['Paleontology', 'Ecology'];
 
 var list = $scope.nested.sortKeys(function(a,b) {
@@ -104,7 +107,7 @@ return list.entries($scope.data);
 
 ## Sorting - sort the leaves by value
 
-<script type="text/eval+javascript">
+<script type="text/eval+javascript" class="leaf">
 return $scope.sorted.sortValues(function(a,b) {
 	return a.date > b.date ? 1 : -1;
 }).entries($scope.data);
@@ -112,7 +115,7 @@ return $scope.sorted.sortValues(function(a,b) {
 
 ## Populate a select list
 
-<script type="text/eval+javascript">
+<script type="text/eval+javascript" class="leaf">
 var items = d3.nest().key(function(d) {
 	return d.subjects[0];
 }).sortKeys(d3.ascending).rollup(function(leaves) {
@@ -131,13 +134,5 @@ select.selectAll('option').data(items).enter().append('option').attr('value', fu
 return output;
 </script>
 
-</xmp>
+</article>
 
-<!-- scripts -->
-<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
-<script src="../docleaves.js"></script>
-<script>
-var $scope = {};
-docleaves.ready();
-</script>
