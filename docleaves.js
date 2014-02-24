@@ -11,33 +11,61 @@ var docleaves = {
 	base: scripts[scripts.length - 1].getAttribute('src').replace(/\/[^\/]*$/, '/'),
 	requirements: [
 		'vendor/marked/lib/marked.js',
+		'vendor/jshint/jshint.js',
 		'vendor/codemirror/lib/codemirror.js',
 		'vendor/codemirror/mode/javascript/javascript.js',
-		'vendor/highlight/highlight.pack.js'
+		'vendor/codemirror/addon/lint/lint.js',
+		'vendor/codemirror/addon/lint/javascript-lint.js',
+		'vendor/highlight/highlight.pack.js',
+		'vendor/pouchdb/pouchdb.js'
 	],
 
 	convert: function(node) {
+		var scripts = node.querySelectorAll('script.leaf');
+
+		var contents = Array.prototype.map.call(scripts, function(script) {
+			var content = script.innerHTML;
+			script.innerHTML = '';
+			return content;
+		});
+
 		node.innerHTML = marked(node.innerHTML);
+
+		var scripts = node.querySelectorAll('script.leaf');
+
+		Array.prototype.forEach.call(scripts, function(script, index) {
+			script.innerHTML = contents[index];
+		});
+
 		node.style.display = 'block';
 	},
 
 	prepare: function(node){
-		var figure = document.createElement('figure');
-		node.parentNode.insertBefore(figure, node);
+		var figure = node.parentNode;
+
+		if (figure.nodeName != 'FIGURE') {
+			figure = document.createElement('figure');
+			node.parentNode.insertBefore(figure, node);
+			figure.appendChild(node);
+		}
+
+		figure.className = figure.className += ' leaf';
 
 		var textarea = document.createElement('textarea');
-		textarea.innerHTML = node.innerHTML.trim();;
+		textarea.innerHTML = node.innerHTML.trim();
 		figure.appendChild(textarea);
-
-		var editor = CodeMirror.fromTextArea(textarea, {
-		    mode: 'javascript',
-		    lineNumbers: true,
-		    theme: 'blackboard'
-		});
 
 		var samp = document.createElement('samp');
 		samp.textContent = node.getAttribute('placeholder');
 		figure.appendChild(samp);
+
+		var editor = CodeMirror.fromTextArea(textarea, {
+		    mode: 'javascript',
+		    lineNumbers: true,
+		    theme: 'blackboard',
+		    gutters: ["CodeMirror-lint-markers"],
+		    lint: true
+		});
 
 		if (node.className.match(/\bauto\b/)) {
 			docleaves.queue.push(figure);
@@ -47,6 +75,7 @@ var docleaves = {
 			button.textContent = 'Run';
 			button.addEventListener('click', function(event) {
 				event.preventDefault();
+				button.parentNode.removeChild(button);
 				docleaves.run(figure);
 			});
 			samp.appendChild(button);
@@ -71,7 +100,13 @@ var docleaves = {
 				return output.then(done, error);
 			} else if (output instanceof HTMLElement) {
 				samp.appendChild(output);
-			} else {
+			} else if (output instanceof Function) {
+				samp.textContent = output.toString();
+				hljs.highlightBlock(samp);
+			} else if (typeof output == 'string') {
+				samp.textContent = output;
+				hljs.highlightBlock(samp);
+			} else if (typeof output != 'undefined') {
 				samp.textContent = JSON.stringify(output, null, 2);
 				hljs.highlightBlock(samp);
 			}
@@ -85,7 +120,7 @@ var docleaves = {
 			samp.className = 'running';
 
 			try {
-				done(new Function('input', script)(output));
+				done(new Function('input', 'output', script)(output, samp));
 			} catch (e) {
 				error(e.message);
 			}

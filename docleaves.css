@@ -1,5 +1,6 @@
 @import url(vendor/bootstrap/css/bootstrap.min.css);
 @import url(vendor/codemirror/lib/codemirror.css);
+@import url(vendor/codemirror/addon/lint/lint.css);
 @import url(vendor/codemirror/theme/blackboard.css);
 @import url(vendor/highlight/styles/foundation.css);
 
@@ -8,9 +9,14 @@ body {
 }
 
 figure {
-	display: flex !important;
+	/*display: flex !important;*/
 	flex-direction: row;
 	flex-wrap: wrap;
+}
+
+figure:not(.leaf) {
+	text-align: center;
+	margin: 20px;
 }
 
 figure > samp {
@@ -21,7 +27,7 @@ figure > samp {
 	line-height: 1.4;
 	overflow-x: auto;
 	min-width: 20em;
-	max-height: 25em;
+	max-height: 50em;
 	overflow-y: auto;
 	font-size: 80%;
 	line-height: 1;
