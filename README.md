@@ -12,9 +12,7 @@ Interleaved documents
     <meta charset="utf-8">
     <title>Your Example Title</title>
     <script src="../docleaves.js"></script>
-    <body class="container">
-        <object data-markdown data="your-example.md">Loading…</object>
-    </body>
+    <link rel="source" type="text/markdown" href="your-example.md">
 
 `your-example.md`:
 

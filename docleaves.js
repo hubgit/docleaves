@@ -139,17 +139,23 @@ var docleaves = {
 	},
 
 	load: function() {
-		var link = docleaves.create('link', { href: docleaves.base + 'docleaves.css' });
-		document.body.appendChild(link);
+		var link = docleaves.create('link', {
+			rel: 'stylesheet',
+			href: docleaves.base + 'docleaves.css'
+		});
+		document.head.appendChild(link);
 
-		var object = document.querySelector('object[data-markdown]');
-		docleaves.get(object.getAttribute('data'), 'text').then(docleaves.ready);
+		var link = document.querySelector('link[rel=source][type="text/markdown"]');
+		docleaves.get(link.getAttribute('href'), 'text').then(docleaves.ready);
 	},
 
 	ready: function(markdown) {
-		var container = document.querySelector('.container');
-		container.innerHTML = marked(markdown);
-		container.style.display = 'block';
+		var container = docleaves.create('div', {
+			className: 'container',
+			innerHTML: marked(markdown)
+		});
+
+		document.body.appendChild(container);
 
 		docleaves.select('p > img', container).forEach(function(img) {
 			var figure = document.createElement('figure');
