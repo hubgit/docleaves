@@ -1,9 +1,3 @@
-<!---
-title: Ferns
-date: 2014-02-28
-author: Alf Eaton
---->
-
 # Fractal Ferns in D3
 
 ## Background
@@ -12,9 +6,7 @@ author: Alf Eaton
 
 Fractal geometry describes how how visual complexity can be created from simple rules.  It's a relatively recent invention largely because it depends on the ability to carry out a large number of iterations on a set of simple rules - something that is ideally suited for computers.  The word fractal was coined by the creator of fractal geometry, Benoit Mandelbrot, in 1975 to describe the fractured looking forms that are often seen in the nature world in everything from plants to mountain ranges.
 
-<!--
 ![A Julia Set](https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Julia_set_%28ice%29.png/256px-Julia_set_%28ice%29.png)
--->
 
 Fractals are mathematical entities that display self-similar patterns - they can be examined at many levels of magnification and look identical (or at least similar) because of their repeating, recursive nature.  Here we are looking at fractal ferns and this video does an excellent job of showing how this type of fractal, given a sufficient number of points, can be zoomed into infinitely (theoretically) and will continue to repeat the same pattern.  Fractal ferns, also known as Barnsley Ferns, are just one of many well documented fractals out there that can be produced in a similar iterative fashion.  Julia sets are one of the other types of fractals I considered using for this first post on fractals.
 
