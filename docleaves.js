@@ -20,43 +20,28 @@ var docleaves = {
 		'vendor/pouchdb/pouchdb.js'
 	],
 
-	convert: function(node) {
-		var scripts = node.querySelectorAll('script.leaf');
-
-		var contents = Array.prototype.map.call(scripts, function(script) {
-			var content = script.innerHTML;
-			script.innerHTML = '';
-			return content;
-		});
-
-		node.innerHTML = marked(node.innerHTML);
-
-		var scripts = node.querySelectorAll('script.leaf');
-
-		Array.prototype.forEach.call(scripts, function(script, index) {
-			script.innerHTML = contents[index];
-		});
-
-		node.style.display = 'block';
-	},
-
 	prepare: function(node){
-		var figure = node.parentNode;
+		var pre = node.parentNode;
+		var script = node.textContent.trim(); // FIXME: using textContent as Marked escapes < in code blocks;
 
-		if (figure.nodeName != 'FIGURE') {
-			figure = document.createElement('figure');
-			node.parentNode.insertBefore(figure, node);
-			figure.appendChild(node);
+		var sibling = pre.nextSibling;
+		while (sibling && (sibling.nodeType != Node.ELEMENT_NODE)) {
+			sibling = sibling.nextSibling;
 		}
+		var auto = !(sibling && sibling.nodeName == 'BUTTON');
 
-		figure.className = figure.className += ' leaf';
+		var figure = docleaves.create('figure', {
+			className: auto ? 'leaf auto' : 'leaf'
+		});
+		figure.appendChild(node);
 
-		var textarea = document.createElement('textarea');
-		textarea.innerHTML = node.innerHTML.trim();
+		pre.parentNode.insertBefore(figure, pre);
+		pre.parentNode.removeChild(pre);
+
+		var textarea = docleaves.create('textarea', { innerHTML: script });
 		figure.appendChild(textarea);
 
-		var samp = document.createElement('samp');
-		samp.textContent = node.getAttribute('placeholder');
+		var samp = docleaves.create('samp');
 		figure.appendChild(samp);
 
 		var editor = CodeMirror.fromTextArea(textarea, {
@@ -67,72 +52,153 @@ var docleaves = {
 		    lint: true
 		});
 
-		if (node.className.match(/\bauto\b/)) {
+		if (auto) {
 			docleaves.queue.push(figure);
+
+			editor.on('change', function(cm) {
+				docleaves.execute(editor.getValue(), samp);
+		  	});
 		} else {
-			var button = document.createElement('button');
-			button.className = 'btn btn-primary'
-			button.textContent = 'Run';
-			button.addEventListener('click', function(event) {
+			sibling.className = 'btn btn-primary';
+			sibling.setAttribute('type', 'button');
+			sibling.addEventListener('click', function(event) {
 				event.preventDefault();
-				button.parentNode.removeChild(button);
 				docleaves.run(figure);
 			});
-			samp.appendChild(button);
+
+			//figure.insertBefore(sibling, samp);
 		}
 
 		node.parentNode.removeChild(node);
 	},
 
-	run: function(figure, output) {
+	run: function(figure) {
 		var samp = figure.querySelector('samp');
 		var script = figure.querySelector('textarea').textContent;
-
-		var error = function(message) {
-			samp.className = 'error';
-			done(message);
-		};
-
-		var done = function(output) {
-			samp.className = 'success';
-
-			if (output instanceof Promise) {
-				return output.then(done, error);
-			} else if (output instanceof HTMLElement) {
-				samp.appendChild(output);
-			} else if (output instanceof Function) {
-				samp.textContent = output.toString();
-				hljs.highlightBlock(samp);
-			} else if (typeof output == 'string') {
-				samp.textContent = output;
-				hljs.highlightBlock(samp);
-			} else if (typeof output != 'undefined') {
-				samp.textContent = JSON.stringify(output, null, 2);
-				hljs.highlightBlock(samp);
-			}
-
-			if (docleaves.queue.length) {
-				docleaves.run(docleaves.queue.shift(), output);
-			}
-		};
-
-		(function(script, node) {
-			samp.className = 'running';
-
-			try {
-				done(new Function('input', 'output', script)(output, samp));
-			} catch (e) {
-				error(e.message);
-			}
-		})(script, samp);
+		docleaves.execute(script, samp);
 	},
 
-	ready: function() {
-		// convert the Markdown
-		Array.prototype.forEach.call(document.querySelectorAll('.markdown'), docleaves.convert);
+	error: function(message, samp) {
+		samp.className = 'error';
+		docleaves.done(message, samp);
+	},
+
+	done: function(output, samp) {
+		samp.className = 'success';
+
+		var outputType = docleaves.typeof(output);
+
+		switch (outputType) {
+			case undefined:
+				if (output instanceof HTMLElement) {
+					samp.appendChild(output);
+				} else if (!samp.firstChild) {
+					samp.parentNode.removeChild(samp);
+				}
+			break;
+
+			case 'string':
+				samp.textContent = output;
+				//hljs.highlightBlock(samp);
+			break;
+
+			case 'function':
+				samp.textContent = output.toString();
+				hljs.highlightBlock(samp);
+			break;
+
+			case 'promise':
+				return output.then(function(output) {
+					docleaves.done(output, samp);
+				}, function(message) {
+					console.log(message);
+					docleaves.error(message, samp);
+				});
+
+			case 'array':
+			default:
+				samp.textContent = JSON.stringify(output, null, 2);
+				hljs.highlightBlock(samp);
+			break;
+		}
+
+		if (docleaves.queue.length) {
+			docleaves.run(docleaves.queue.shift());
+		}
+	},
+
+	execute: function(script, samp) {
+		samp.className = 'running';
+
+		try {
+			docleaves.done(new Function('output', script)(samp), samp);
+		} catch (e) {
+			console.log(e.stack);
+			docleaves.error(e.stack, samp);
+		}
+	},
+
+	load: function() {
+		var link = docleaves.create('link', { href: docleaves.base + 'docleaves.css' });
+		document.body.appendChild(link);
+
+		var object = document.querySelector('object[data-markdown]');
+		docleaves.get(object.getAttribute('data'), 'text').then(docleaves.ready);
+	},
+
+	ready: function(markdown) {
+		var container = document.querySelector('.container');
+		container.innerHTML = marked(markdown);
+		container.style.display = 'block';
+
+		docleaves.select('p > img', container).forEach(function(img) {
+			var figure = document.createElement('figure');
+			// TODO: wrap image in figure and create caption from alt text
+		});
+
+		// add data-element attributes
+		docleaves.select('*', container).forEach(function(node) {
+			switch (node.nodeName) {
+				case 'H1':
+					node.setAttribute('data-element', '#');
+					break;
+
+				case 'H2':
+					node.setAttribute('data-element', '##');
+					break;
+
+				case 'H3':
+					node.setAttribute('data-element', '###');
+					break;
+
+				default:
+					var style = window.getComputedStyle(node);
+
+					if (style.display == 'block') {
+						node.setAttribute('data-element', node.nodeName.toLowerCase());
+					}
+
+					break;
+			}
+
+			// http://stackoverflow.com/a/15993398/145899
+
+			node.onclick = function() {
+				this.contentEditable = true;
+                this.focus();
+			}
+
+			node.onmouseout = function() {
+				this.contentEditable = false;
+				this.blur();
+				//this.outerHTML = marked(this.innerHTML);
+			}
+
+			// TODO: keypress for new paragraph
+		});
 
 		// prepare each leaf
-		Array.prototype.forEach.call(document.querySelectorAll('.leaf'), docleaves.prepare);
+		docleaves.select('pre > code.lang-js').forEach(docleaves.prepare);
 
 		// run each script
 		if (docleaves.queue.length) {
@@ -141,9 +207,10 @@ var docleaves = {
 	},
 
 	require: function() {
-		var script = document.createElement('script');
-		script.src = docleaves.base + docleaves.requirements.shift();
-		script.onload = docleaves.requirements.length ? docleaves.require : docleaves.ready;
+		var url = docleaves.base + docleaves.requirements.shift();
+		var onload = docleaves.requirements.length ? docleaves.require : docleaves.load;
+		var script = docleaves.create('script', { src: url }, { load: onload });
+
 		document.body.appendChild(script);
 	},
 
@@ -164,6 +231,59 @@ var docleaves = {
 
 			xhr.send();
 		});
+	},
+
+	select: function(selector, root) {
+		root = root || document;
+
+		return Array.prototype.slice.call(root.querySelectorAll(selector));
+	},
+
+	create: function(name, attributes, events) {
+		var node = document.createElement(name);
+
+		if (attributes) {
+			Object.keys(attributes).forEach(function(key) {
+				switch (key) {
+					case 'textContent':
+					case 'innerHTML':
+					case 'className':
+						node[key] = attributes[key];
+						break;
+
+					default:
+						node.setAttribute(key, attributes[key]);
+						break;
+				}
+			});
+		}
+
+		if (events) {
+			Object.keys(events).forEach(function(key) {
+				node.addEventListener(key, events[key]);
+			});
+		}
+
+		return node;
+	},
+
+	typeof: function(object) {
+		switch (Object.prototype.toString.call(object)) {
+			case '[object Object]':
+				return 'object';
+
+			case '[object Array]':
+				return 'array';
+
+			case '[object String]':
+				return 'string';
+
+			case '[object Function]':
+				return 'function';
+
+			case '[object Promise]':
+				return 'promise';
+		}
 	}
 };
 
